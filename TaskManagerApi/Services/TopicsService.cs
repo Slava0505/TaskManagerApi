@@ -1,25 +1,18 @@
-<<<<<<< HEAD
+
 ﻿using Microsoft.EntityFrameworkCore;
 using TaskManagerApi.Models;
 using TaskManagerApi.ViewModels;
-=======
-﻿using TaskManagerApi.Models;
->>>>>>> f7f75e7fd6fe86c631a21dd4fee2b50f5b6bef12
 
 namespace TaskManagerApi.Services
 {
     public interface ITopicsService
     {
-<<<<<<< HEAD
-        Task AddTopic(TopicViewModel model);
+
+        Task<TopicViewModel> AddTopic(TopicViewModel model);
         Task<List<TopicViewModel>> GetTopicsList();
         Task<Topic?> GetTopic(int id);
         Task<TopicViewModel> GetTopicViewModel(int id);
         Task DeleteTopic(int id);
-=======
-        Task AddTopic(Topic model);
-        Task GeneratTopic();
->>>>>>> f7f75e7fd6fe86c631a21dd4fee2b50f5b6bef12
     }
 
 
@@ -32,36 +25,21 @@ namespace TaskManagerApi.Services
             _context = context;
         }
 
-<<<<<<< HEAD
 
-        public async Task AddTopic(TopicViewModel model)
-        {
-            await _context.Topics.AddAsync(new Topic
-            {
-=======
-        public async Task GeneratTopic()
-        {
-            var topicModel = new Topic
-            {
-                Name = "123"
-            };
-            await AddTopic(topicModel);
-            return;
-        }
 
-        public async Task AddTopic(Topic model)
+        public async Task<TopicViewModel> AddTopic(TopicViewModel model)
         {
-            await _context.Topics.AddAsync(new Topic
+            var topic = new Topic
             {
-                Id = model.Id,
->>>>>>> f7f75e7fd6fe86c631a21dd4fee2b50f5b6bef12
                 Name = model.Name,
                 ParentId = model.ParentId
-            });
+            };
+            await _context.Topics.AddAsync(topic);
             await _context.SaveChangesAsync();
+            return model;
         }
 
-<<<<<<< HEAD
+
         public async Task<Topic?> GetTopic(int id)
         {
             return await _context.Topics.FirstOrDefaultAsync(x => x.Id == id);
@@ -94,8 +72,5 @@ namespace TaskManagerApi.Services
             await _context.SaveChangesAsync();
             
         }
-=======
->>>>>>> f7f75e7fd6fe86c631a21dd4fee2b50f5b6bef12
-
     }
 }
