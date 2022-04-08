@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using TaskManagerApi.Services;
+using TaskManagerApi.Models;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +11,14 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services
+	.AddControllers()
+	.AddNewtonsoftJson(options =>
+	{
+		options.SerializerSettings.ContractResolver = new PatchRequestContractResolver();
+	});
+// JsonPatch
+// builder.Services.AddControllersWithViews();
 //DB
 string connection = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationContext>(options => options.UseSqlServer(connection));
