@@ -64,7 +64,7 @@ namespace TaskManagerApi.Controllers
         {
             try
             {
-                var topic = await _topicsService.GetTopic(id);
+                var topic = await _topicsService.GetTopicViewModel(id);
                 return Ok(topic);
             }
             catch (Exception ex)
@@ -83,8 +83,24 @@ namespace TaskManagerApi.Controllers
 
         // DELETE api/<TopicsController>/5
         [HttpDelete("{id:int}")]
-        public void Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
+            try
+            {
+                var existe = await _topicsService.GetTopic(id);
+
+                if (existe == null)
+                {
+                    return NotFound();
+                }
+                await _topicsService.DeleteTopic(id);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(501, "Something went wrong");
+            }
+
         }
     }
 }

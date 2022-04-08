@@ -8,7 +8,9 @@ namespace TaskManagerApi.Services
     {
         Task AddTopic(TopicViewModel model);
         Task<List<TopicViewModel>> GetTopicsList();
-        Task<TopicViewModel> GetTopic(int id);
+        Task<Topic?> GetTopic(int id);
+        Task<TopicViewModel> GetTopicViewModel(int id);
+        Task DeleteTopic(int id);
     }
 
 
@@ -32,9 +34,14 @@ namespace TaskManagerApi.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task<TopicViewModel> GetTopic(int id)
+        public async Task<Topic?> GetTopic(int id)
         {
-            var topic = await _context.Topics.FirstOrDefaultAsync(x => x.Id == id);
+            return await _context.Topics.FirstOrDefaultAsync(x => x.Id == id);
+        }
+
+        public async Task<TopicViewModel> GetTopicViewModel(int id)
+        {
+            var topic = await GetTopic(id);
             return new TopicViewModel
             {
                 Name = topic.Name,
@@ -50,6 +57,14 @@ namespace TaskManagerApi.Services
                 ParentId = topic.ParentId
             }).ToListAsync();
             return topics;
+        }
+
+        public async Task DeleteTopic(int id)
+        {
+            var topic = await GetTopic(id);
+            _context.Topics.Remove(topic);
+            await _context.SaveChangesAsync();
+            
         }
 
     }
