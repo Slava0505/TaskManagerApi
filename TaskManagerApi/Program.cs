@@ -30,10 +30,12 @@ builder.Services.AddScoped<ITopicsService, TopicsService>();
 var app = builder.Build();
 
 //DB init and update
+/*
 using var serviceScope = app.Services.CreateScope();
 var context = serviceScope.ServiceProvider.GetService<ApplicationContext>();
 // auto migration
 context?.Database.Migrate();
+*/
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

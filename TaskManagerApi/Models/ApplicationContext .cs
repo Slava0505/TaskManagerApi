@@ -3,7 +3,7 @@ using TaskManagerApi.Models;
 
 public class ApplicationContext : DbContext
 {
-    public DbSet<Topic> Topics { get; set; } = null!;
+    public DbSet<Topic> Topics { get; set; }
     public ApplicationContext(DbContextOptions<ApplicationContext> options)
         : base(options)
     {
