@@ -2,6 +2,8 @@
 using TaskManagerApi.Services;
 using TaskManagerApi.ViewModels;
 using TaskManagerApi.PatchDto;
+>>>>>>> f7f75e7fd6fe86c631a21dd4fee2b50f5b6bef12
+
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -70,14 +72,13 @@ namespace TaskManagerApi.Controllers
                 return NotFound();
             }
             try
-            {
                 var topicViewModel = await _topicsService.GetTopicViewModel(id);
                 return Ok(topicViewModel);
+                return Ok(topic);
             }
             catch (Exception ex)
             {
                 return StatusCode(501, "Something went wrong");
-            }
         }
 
 
@@ -89,11 +90,14 @@ namespace TaskManagerApi.Controllers
             try
             {
                 var topic = await _topicsService.GetTopic(id);
-
-                if (topic == null)
-                {
-                    return NotFound();
-                }
+        [HttpGet]
+        // GET api/<TopicsController>/5
+        [HttpGet("{id}")]
+        public string Get(int id)
+        {
+            return "value";
+>>>>>>> f7f75e7fd6fe86c631a21dd4fee2b50f5b6bef12
+        }
 
                 await _topicsService.PatchTopic(id, patchTopicDto);
                 var topicViewModel = await _topicsService.GetTopicViewModel(id);
@@ -104,12 +108,22 @@ namespace TaskManagerApi.Controllers
             {
                 return StatusCode(501, "Something went wrong");
             }
+
+        // PUT api/<TopicsController>/5
+<<<<<<< HEAD
+        [HttpPut("{id:int}")]
+=======
+        [HttpPut("{id}")]
+>>>>>>> f7f75e7fd6fe86c631a21dd4fee2b50f5b6bef12
+        public void Put(int id, [FromBody] string value)
+        {
         }
 
         // DELETE api/<TopicsController>/5
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> Delete(int id)
         {
+                // todo Make message
             try
             {
                 var topic = await _topicsService.GetTopic(id);
@@ -119,7 +133,6 @@ namespace TaskManagerApi.Controllers
                     return NotFound();
                 }
                 await _topicsService.DeleteTopic(id);
-                // todo Make message
                 return Ok();
             }
             catch (Exception ex)
