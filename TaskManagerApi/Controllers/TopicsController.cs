@@ -39,7 +39,7 @@ namespace TaskManagerApi.Controllers
 
         // POST api/<TopicsController>
         [HttpPost]
-        public async Task<IActionResult> Post(TopicViewModel topicViewModel)
+        public async Task<IActionResult> Post(BaseTopicViewModel baseTopicViewModel)
         {
             if (!ModelState.IsValid)
             {
@@ -47,7 +47,7 @@ namespace TaskManagerApi.Controllers
             }
             try
             {
-                await _topicsService.AddTopic(topicViewModel);
+                var topicViewModel = await _topicsService.AddTopic(baseTopicViewModel);
                 return Ok(topicViewModel);
             }
             catch (Exception ex)
@@ -61,17 +61,17 @@ namespace TaskManagerApi.Controllers
 
         // GET api/<TopicsController>/5
         [HttpGet("{topicId:int}")]
-        public async Task<IActionResult> Get(int id)
+        public async Task<IActionResult> Get(int topicId)
         {
             // Checking for existence
-            var topic = await _topicsService.GetTopic(id);
+            var topic = await _topicsService.GetTopic(topicId);
             if (topic == null)
             {
                 return NotFound();
             }
             try
             {
-                var topicViewModel = await _topicsService.GetTopicViewModel(id);
+                var topicViewModel = await _topicsService.GetTopicViewModel(topicId);
                 return Ok(topicViewModel);
             }
             catch (Exception ex)
@@ -84,19 +84,19 @@ namespace TaskManagerApi.Controllers
 
         // PUT api/<TopicsController>/5
         [HttpPatch("{topicId:int}")]
-        public async Task<IActionResult> Patch(int id, PatchTopicDto patchTopicDto)
+        public async Task<IActionResult> Patch(int topicId, PatchTopicDto patchTopicDto)
         {
             try
             {
-                var topic = await _topicsService.GetTopic(id);
+                var topic = await _topicsService.GetTopic(topicId);
 
                 if (topic == null)
                 {
                     return NotFound();
                 }
 
-                await _topicsService.PatchTopic(id, patchTopicDto);
-                var topicViewModel = await _topicsService.GetTopicViewModel(id);
+                await _topicsService.PatchTopic(topicId, patchTopicDto);
+                var topicViewModel = await _topicsService.GetTopicViewModel(topicId);
 
                 return Ok(topicViewModel);
             }
@@ -108,17 +108,18 @@ namespace TaskManagerApi.Controllers
 
         // DELETE api/<TopicsController>/5
         [HttpDelete("{topicId:int}")]
-        public async Task<ActionResult> Delete(int id)
+        public async Task<ActionResult> Delete(int topicId)
         {
+            var topic = await _topicsService.GetTopic(topicId);
+
+            if (topic == null)
+            {
+                return NotFound();
+            }
+            await _topicsService.DeleteTopic(topicId);
             try
             {
-                var topic = await _topicsService.GetTopic(id);
 
-                if (topic == null)
-                {
-                    return NotFound();
-                }
-                await _topicsService.DeleteTopic(id);
                 // todo Make message
                 return Ok();
             }
@@ -130,32 +131,48 @@ namespace TaskManagerApi.Controllers
 
         // GET api/<TopicsController>/5
         [HttpGet("{topicId:int}/childs")]
-        public async Task<IActionResult> GetChilds(int id)
+        public async Task<IActionResult> GetChilds(int topicId)
         {
             // Checking for existence
-            var topic = await _topicsService.GetTopic(id);
+            var topic = await _topicsService.GetTopic(topicId);
             if (topic == null)
             {
                 return NotFound();
             }
 
-                var childs = await _topicsService.GetTopicChilds(id);
+                var childs = await _topicsService.GetTopicChilds(topicId);
                 return Ok(childs);
 
         }
 
         // POST api/<TopicsController>
         [HttpPost("{topicId:int}/childs")]
-        public async Task<IActionResult> PostChilds(int id, List<int> childIds)
+        public async Task<IActionResult> PostChilds(int topicId, List<int> childIds)
         {
             if (!ModelState.IsValid)
             {
                 return StatusCode(401, "Topic model is incorrect!");
             }
 
-                await _topicsService.PatchTopicChilds(id, childIds);
+                await _topicsService.PatchTopicChilds(topicId, childIds);
 
                 return Ok();
+
+        }
+
+
+        // POST api/<TopicsController>
+        [HttpDelete("{topicId:int}/childs")]
+        public async Task<IActionResult> DeleteChilds(int topicId, List<int> childIds)
+        {
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(401, "Topic model is incorrect!");
+            }
+
+            await _topicsService.DeleteTopicChilds(topicId, childIds);
+
+            return Ok();
 
         }
     }

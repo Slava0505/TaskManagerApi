@@ -11,14 +11,15 @@ namespace TaskManagerApi.Services
     public interface ITopicsService
     {
 
-        Task<TopicViewModel> AddTopic(TopicViewModel model);
+        Task<TopicViewModel> AddTopic(BaseTopicViewModel model);
         Task PatchTopic(int id, [FromBody] PatchTopicDto patchTopicDto);
         Task<List<TopicViewModel>> GetTopicsList();
         Task<Topic?> GetTopic(int id);
         Task<TopicViewModel> GetTopicViewModel(int id);
         Task DeleteTopic(int id);
         Task PatchTopicChilds(int id, List<int> childIds);
-        Task<ICollection<Topic>> GetTopicChilds(int id);
+        Task<ICollection<TopicViewModel>> GetTopicChilds(int id);
+        Task DeleteTopicChilds(int id, List<int> childIds);
     }
 
 
@@ -33,7 +34,7 @@ namespace TaskManagerApi.Services
 
 
 
-        public async Task<TopicViewModel> AddTopic(TopicViewModel model)
+        public async Task<TopicViewModel> AddTopic(BaseTopicViewModel model)
         {
             var topic = new Topic
             {
@@ -42,7 +43,9 @@ namespace TaskManagerApi.Services
             };
             await _context.Topics.AddAsync(topic);
             await _context.SaveChangesAsync();
-            return model;
+
+
+            return await GetTopicViewModel(topic.Id);
         }
         public async Task PatchTopic(int id, PatchTopicDto patchTopicDto)
         {
@@ -57,7 +60,7 @@ namespace TaskManagerApi.Services
 
         public async Task<Topic?> GetTopic(int id)
         {
-            return await _context.Topics.FirstOrDefaultAsync(x => x.Id == id);
+            return await _context.Topics.Where(x => x.Id == id).Include(x => x.ChildTopics).FirstOrDefaultAsync();
         }
 
         public async Task<TopicViewModel> GetTopicViewModel(int id)
@@ -65,6 +68,7 @@ namespace TaskManagerApi.Services
             var topic = await GetTopic(id);
             return new TopicViewModel
             {
+                Id = topic.Id,
                 Name = topic.Name,
                 ParentId = topic.ParentId
             };
@@ -74,6 +78,7 @@ namespace TaskManagerApi.Services
         {
             var topics = await _context.Topics.Select(topic => new TopicViewModel()
             {
+                Id = topic.Id,
                 Name = topic.Name,
                 ParentId = topic.ParentId
             }).ToListAsync();
@@ -83,9 +88,13 @@ namespace TaskManagerApi.Services
         public async Task DeleteTopic(int id)
         {
             var topic = await GetTopic(id);
+            foreach (var child in topic.ChildTopics.ToList()) 
+            {
+                _context.Topics.Remove(child); 
+            }
+                
             _context.Topics.Remove(topic);
             await _context.SaveChangesAsync();
-            
         }
 
         public async Task PatchTopicChilds(int id, List<int> childIds)
@@ -96,19 +105,36 @@ namespace TaskManagerApi.Services
             {
                 var topic = await GetTopic(childId);
                 topic.ParentId = id;
-                //topic.ParentTopic = parentTopic;
                 _context.Topics.Update(topic);
-                //parentTopic.ChildTopics.Add(topic);
-                //_context.Topics.Update(parentTopic);
             }
 
             await _context.SaveChangesAsync();
         }
 
-        public async Task<ICollection<Topic>> GetTopicChilds(int id)
+        public async Task<ICollection<TopicViewModel>> GetTopicChilds(int id)
         {
-            var childs = await _context.Topics.Where(x => x.Id == id).Include(x => x.ChildTopics).ToListAsync();
+            var topic = await GetTopic(id);
+            var childs = topic.ChildTopics.Select(topic => new TopicViewModel()
+            {
+                Id = topic.Id,
+                Name = topic.Name,
+                ParentId = topic.ParentId
+            }).ToList();
+
             return childs;
+        }
+        public async Task DeleteTopicChilds(int id, List<int> childIds)
+        {
+            var topic = await GetTopic(id);
+            foreach (var child in topic.ChildTopics.ToList())
+            {
+                if (childIds.Contains(child.Id))
+                {
+                    _context.Topics.Remove(child);
+                }
+            }
+
+            await _context.SaveChangesAsync();
         }
     }
 }
