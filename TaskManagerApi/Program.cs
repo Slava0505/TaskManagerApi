@@ -1,7 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using TaskManagerApi.Services;
 using TaskManagerApi.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
+var adminRole = new Role("admin");
+var userRole = new Role("user");
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +32,31 @@ builder.Services.AddDbContext<ApplicationContext>(options => options.UseSqlServe
 // Services
 builder.Services.AddScoped<ITopicsService, TopicsService>();
 
+// JwtBearer tocken
+builder.Services.AddAuthorization();
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            // указывает, будет ли валидироваться издатель при валидации токена
+            ValidateIssuer = true,
+            // строка, представляющая издателя
+            ValidIssuer = JwtConfigurations.Issuer,
+            // будет ли валидироваться потребитель токена
+            ValidateAudience = true,
+            // установка потребителя токена
+            ValidAudience = JwtConfigurations.Audience,
+            // будет ли валидироваться время существования
+            ValidateLifetime = true,
+            // установка ключа безопасности
+            IssuerSigningKey = JwtConfigurations.GetSymmetricSecurityKey(),
+            // валидация ключа безопасности
+            ValidateIssuerSigningKey = true,
+
+        };
+    });
+
 
 var app = builder.Build();
 
@@ -38,6 +67,11 @@ var context = serviceScope.ServiceProvider.GetService<ApplicationContext>();
 // auto migration
 context?.Database.Migrate();
 */
+
+// Auth
+app.UseAuthentication();
+app.UseAuthorization();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
