@@ -17,7 +17,9 @@ builder.Services
 	{
 		options.SerializerSettings.ContractResolver = new PatchRequestContractResolver();
 	});
-// JsonPatch
+// Self referencing loop detected fix
+builder.Services.AddControllers().AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+
 // builder.Services.AddControllersWithViews();
 //DB
 string connection = builder.Configuration.GetConnectionString("DefaultConnection");

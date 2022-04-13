@@ -17,6 +17,8 @@ namespace TaskManagerApi.Services
         Task<Topic?> GetTopic(int id);
         Task<TopicViewModel> GetTopicViewModel(int id);
         Task DeleteTopic(int id);
+        Task PatchTopicChilds(int id, List<int> childIds);
+        Task<ICollection<Topic>> GetTopicChilds(int id);
     }
 
 
@@ -84,6 +86,29 @@ namespace TaskManagerApi.Services
             _context.Topics.Remove(topic);
             await _context.SaveChangesAsync();
             
+        }
+
+        public async Task PatchTopicChilds(int id, List<int> childIds)
+        {
+            var parentTopic = await GetTopic(id);
+
+            foreach (var childId in childIds)
+            {
+                var topic = await GetTopic(childId);
+                topic.ParentId = id;
+                //topic.ParentTopic = parentTopic;
+                _context.Topics.Update(topic);
+                //parentTopic.ChildTopics.Add(topic);
+                //_context.Topics.Update(parentTopic);
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<ICollection<Topic>> GetTopicChilds(int id)
+        {
+            var childs = await _context.Topics.Where(x => x.Id == id).Include(x => x.ChildTopics).ToListAsync();
+            return childs;
         }
     }
 }

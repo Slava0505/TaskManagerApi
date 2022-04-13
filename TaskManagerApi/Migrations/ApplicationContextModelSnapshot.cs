@@ -36,26 +36,26 @@ namespace TaskManagerApi.Migrations
                     b.Property<int?>("ParentId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("TopicId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("TopicId");
+                    b.HasIndex("ParentId");
 
                     b.ToTable("Topics");
                 });
 
             modelBuilder.Entity("TaskManagerApi.Models.Topic", b =>
                 {
-                    b.HasOne("TaskManagerApi.Models.Topic", null)
-                        .WithMany("TopicChildsId")
-                        .HasForeignKey("TopicId");
+                    b.HasOne("TaskManagerApi.Models.Topic", "ParentTopic")
+                        .WithMany("ChildTopics")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("ParentTopic");
                 });
 
             modelBuilder.Entity("TaskManagerApi.Models.Topic", b =>
                 {
-                    b.Navigation("TopicChildsId");
+                    b.Navigation("ChildTopics");
                 });
 #pragma warning restore 612, 618
         }

@@ -4,7 +4,7 @@
 
 namespace TaskManagerApi.Migrations
 {
-    public partial class AddTopic : Migration
+    public partial class Start : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -15,23 +15,22 @@ namespace TaskManagerApi.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ParentId = table.Column<int>(type: "int", nullable: true),
-                    TopicId = table.Column<int>(type: "int", nullable: true)
+                    ParentId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Topics", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Topics_Topics_TopicId",
-                        column: x => x.TopicId,
+                        name: "FK_Topics_Topics_ParentId",
+                        column: x => x.ParentId,
                         principalTable: "Topics",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Topics_TopicId",
+                name: "IX_Topics_ParentId",
                 table: "Topics",
-                column: "TopicId");
+                column: "ParentId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

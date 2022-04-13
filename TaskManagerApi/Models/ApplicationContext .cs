@@ -8,5 +8,14 @@ public class ApplicationContext : DbContext
         : base(options)
     {
         Database.EnsureCreated();   // создаем базу данных при первом обращении
+
+    }
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<Topic>()
+            .HasOne(c => c.ParentTopic).WithMany(i => i.ChildTopics)
+            .HasForeignKey(e => e.ParentId)
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }

@@ -7,7 +7,7 @@ using TaskManagerApi.PatchDto;
 
 namespace TaskManagerApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("topics/")]
     [ApiController]
     public class TopicsController : ControllerBase
     {
@@ -60,7 +60,7 @@ namespace TaskManagerApi.Controllers
 
 
         // GET api/<TopicsController>/5
-        [HttpGet("{id:int}")]
+        [HttpGet("{topicId:int}")]
         public async Task<IActionResult> Get(int id)
         {
             // Checking for existence
@@ -83,7 +83,7 @@ namespace TaskManagerApi.Controllers
 
 
         // PUT api/<TopicsController>/5
-        [HttpPatch("{id:int}")]
+        [HttpPatch("{topicId:int}")]
         public async Task<IActionResult> Patch(int id, PatchTopicDto patchTopicDto)
         {
             try
@@ -107,7 +107,7 @@ namespace TaskManagerApi.Controllers
         }
 
         // DELETE api/<TopicsController>/5
-        [HttpDelete("{id:int}")]
+        [HttpDelete("{topicId:int}")]
         public async Task<ActionResult> Delete(int id)
         {
             try
@@ -126,6 +126,37 @@ namespace TaskManagerApi.Controllers
             {
                 return StatusCode(501, "Something went wrong");
             }
+        }
+
+        // GET api/<TopicsController>/5
+        [HttpGet("{topicId:int}/childs")]
+        public async Task<IActionResult> GetChilds(int id)
+        {
+            // Checking for existence
+            var topic = await _topicsService.GetTopic(id);
+            if (topic == null)
+            {
+                return NotFound();
+            }
+
+                var childs = await _topicsService.GetTopicChilds(id);
+                return Ok(childs);
+
+        }
+
+        // POST api/<TopicsController>
+        [HttpPost("{topicId:int}/childs")]
+        public async Task<IActionResult> PostChilds(int id, List<int> childIds)
+        {
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(401, "Topic model is incorrect!");
+            }
+
+                await _topicsService.PatchTopicChilds(id, childIds);
+
+                return Ok();
+
         }
     }
 }
