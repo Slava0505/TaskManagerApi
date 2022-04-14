@@ -3,18 +3,19 @@ using TaskManagerApi.Services;
 using TaskManagerApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Identity;
 
 var adminRole = new Role("admin");
 var userRole = new Role("user");
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 
+// Add services to the container.
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 builder.Services
 	.AddControllers()
 	.AddNewtonsoftJson(options =>
@@ -31,6 +32,14 @@ builder.Services.AddDbContext<ApplicationContext>(options => options.UseSqlServe
 
 // Services
 builder.Services.AddScoped<ITopicsService, TopicsService>();
+// Pass Hasher
+builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
+
+// Auth
+builder.Services.AddSingleton<IAuthService, AuthService>();
+builder.Services.AddSingleton<IJwtHandler, JwtHandler>();
+//builder.Services.AddTransient<ITokenManager, TokenManager>();
+
 
 // JwtBearer tocken
 builder.Services.AddAuthorization();
@@ -53,10 +62,37 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = JwtConfigurations.GetSymmetricSecurityKey(),
             // валидация ключа безопасности
             ValidateIssuerSigningKey = true,
+            //ValidateAudience = false,
 
         };
     });
+builder.Services.AddSwaggerGen(setup =>
+{
+    // Include 'SecurityScheme' to use JWT Authentication
+    var jwtSecurityScheme = new OpenApiSecurityScheme
+    {
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Name = "JWT Authentication",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Description = "Put **_ONLY_** your JWT Bearer token on textbox below!",
 
+        Reference = new OpenApiReference
+        {
+            Id = JwtBearerDefaults.AuthenticationScheme,
+            Type = ReferenceType.SecurityScheme
+        }
+    };
+
+    setup.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
+
+    setup.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        { jwtSecurityScheme, Array.Empty<string>() }
+    });
+
+});
 
 var app = builder.Build();
 

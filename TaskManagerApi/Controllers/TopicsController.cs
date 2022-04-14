@@ -9,12 +9,12 @@ namespace TaskManagerApi.Controllers
 {
     [Route("topics/")]
     [ApiController]
-    public class TopicsController : ControllerBase
+    public class TopicsController2 : ControllerBase
     {
 
-        private readonly ILogger<TopicsController> _logger;
+        private readonly ILogger<TopicsController2> _logger;
         private readonly ITopicsService _topicsService;
-        public TopicsController(ILogger<TopicsController> logger,
+        public TopicsController2(ILogger<TopicsController2> logger,
                 ITopicsService topicsService)
         {
             _logger = logger;

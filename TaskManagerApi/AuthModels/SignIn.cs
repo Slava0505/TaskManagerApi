@@ -1,6 +1,6 @@
-﻿namespace TaskManagerApi.Dto
+﻿namespace TaskManagerApi.AuthModels
 {
-    public class LoginDto
+    public class SignIn
     {
         public string Username { get; set; }
         public string Password { get; set; }
